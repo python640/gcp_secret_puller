@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 How to run:
 ```
-python3 get_all_secrets.py [-h] [--format] [--filename] <gcp_project_id>
+python3 get_all_secrets.py [-h] [--filter] [--format] [--filename] <gcp_project_id>
 
 positional arguments:
   gcp_project_id  ID or name of the GCP project - required

@@ -35,7 +35,7 @@ def main():
     '''
     parser = argparse.ArgumentParser(
       description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, epilog=example_text, prog='python3 get_all_secrets.py', 
-      usage='gcp_secrets.get_all_secrets [-h] [--format] [--filename] <gcp_project_id>'
+      usage='python3 get_all_secrets.py [-h] [--filter] [--format] [--filename] <gcp_project_id>'
     )
     parser.add_argument("gcp_project_id", type = str, help = "ID or name of the GCP project - required")
     parser.add_argument("--filter", type = str, help = "Filter secrets with labels", metavar = '' ,required = False)    
