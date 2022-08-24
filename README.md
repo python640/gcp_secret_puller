@@ -1,4 +1,4 @@
-Run this script order to fetch all the secrets from the specified GCP project secret manager and store it in .env file in key/value format or in json file in json format.
+Run this script in order to fetch all the secrets from the specified GCP project secret manager and store it in .env file in key/value format or in json file in json format.
 There is an option to filter secrets by labels for example.
 
 Prerequisites:
