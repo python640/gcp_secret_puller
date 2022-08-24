@@ -1,10 +1,11 @@
-This package could be ran from the command line in order to fetch all the secrets from the specified GCP project secret manager and store it in .env file in key/value format or in json file in json format.
+Run this script order to fetch all the secrets from the specified GCP project secret manager and store it in .env file in key/value format or in json file in json format.
+There is an option to filter secrets by labels for example.
 
 Prerequisites:
 
 1. Your project should have secret manager API enabled
 2. You should be logged in to GCP project 
-3. You should have sufficient permissions to read secrets in GCP secrets manager
+3. You should have sufficient permissions to read secrets in GCP secrets manager in this project
 
 For some details please refer to following links:
  
