@@ -22,6 +22,11 @@ def main():
     To dump all the secrets from <gcp_project_id> to .env.json file
 
         python3 get_all_secrets.py --format json <gcp_project_id>
+        
+        
+    To dump all the secrets from <gcp_project_id> to STDOUT
+
+        python3 get_all_secrets.py --format stdout <gcp_project_id>
 
 
     To dump all the secrets from <gcp_project_id> to cookiemonster.env file in key/value
@@ -34,12 +39,12 @@ def main():
         python3 get_all_secrets.py --format json --filename cypress.env <gcp_project_id>
     '''
     parser = argparse.ArgumentParser(
-      description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, epilog=example_text, prog='python3 get_all_secrets.py', 
-      usage='python3 get_all_secrets.py [-h] [--filter] [--format] [--filename] <gcp_project_id>'
+      description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, epilog=example_text, prog='satori_sec_pull_gcp', 
+      usage='satori_sec_pull_gcp [-h] [--filter] [--format] [--filename] <gcp_project_id>'
     )
     parser.add_argument("gcp_project_id", type = str, help = "ID or name of the GCP project - required")
     parser.add_argument("--filter", type = str, help = "Filter secrets with labels", metavar = '' ,required = False)    
-    parser.add_argument("--format", type = str, choices=['json', '.env'], help = "Output file format (json / .env). Default is .env", metavar = '' ,required = False, default = ".env")
+    parser.add_argument("--format", type = str, choices=['json', 'env', 'stdout'], help = "Output format (json / env / stdout). Default is env", metavar = '' ,required = False, default = "env")
     parser.add_argument("--filename", type = str, help = "Output filename. Default is .env or .env.json (depends on --format flag)", metavar = '' ,required = False, default = ".env")
 
     args = parser.parse_args()
@@ -51,11 +56,15 @@ def main():
     filename = args.filename
     secrets = list_secrets_with_filter(gcp_project_id, filter_str, client)
     secrets_ver = access_secret_version(gcp_project_id, secrets, client)
-    # Get all the project secrets to .env file (JSON or key/value text)
+    # Get all the project secrets to .env file (JSON format or key/value) or STDOUT
     if (args.format=="json"):
         secrets_to_json(secrets_ver, gcp_project_id, filename)
-    else:
+    elif (args.format=="env"):
         secrets_to_env(secrets_ver, gcp_project_id, filename)
+    elif (args.format=="stdout"):
+        secrets_to_stdout(secrets_ver, gcp_project_id)
+    else:
+        print("Please provide --format flag with parameter")
 
 def list_secrets_with_filter(gcp_project_id, filter_str, client):
 
@@ -66,23 +75,23 @@ def list_secrets_with_filter(gcp_project_id, filter_str, client):
 
     # List all secrets names with filter
     if not filter_str:
-        print("\nListing all the secrets names in project "+gcp_project_id)
+        print(f"\nListing all the secrets names in project {gcp_project_id}")
     else:
-        print("\nListing all the secrets names in project "+gcp_project_id+" with filter "+filter_str)
+        print(f"\nListing all the secrets names in project {gcp_project_id} with filter {filter_str}")
     try:
         for secret in client.list_secrets(request={"parent": parent, "filter": filter_str}):
             # print(client.list_secrets(request={"parent": parent, "filter": filter_str}))
             strValue = re.sub(".*/", '', format(secret.name))
             secrets[strValue] = None
-            print("Found secret "+strValue)    
+            print(f"Found secret {strValue}")    
             # print(secrets)
         if not any(secrets):
-            print("No secrets are found in project "+gcp_project_id+" with filter "+filter_str)
+            print(f"No secrets are found in project {gcp_project_id} with filter {filter_str}")
             sys.exit(1)
         else:
             return secrets
     except Exception as e:
-        print("ERROR : "+str(e))
+        print(f"ERROR: {str(e)}")
         sys.exit(1)
 
 def access_secret_version(gcp_project_id, secrets, client):
@@ -103,7 +112,7 @@ def access_secret_version(gcp_project_id, secrets, client):
         response = client.access_secret_version(request={"name": name})
       # print(response)
       except Exception as e:
-            print("ERROR : "+str(e))
+            print(f"ERROR: {str(e)}")
             sys.exit(1)
 
       # Store the secret payload
@@ -111,30 +120,47 @@ def access_secret_version(gcp_project_id, secrets, client):
 
     return secrets_dict
 
+def secrets_to_stdout(secrets, gcp_project_id):
+
+    print(f"\nDumping secrets from project {gcp_project_id} to STDOUT\n")
+    try:
+        for key, value in secrets.items():
+            print(f"{key.upper().replace('-','_')}={value}")
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+        sys.exit(1)
+
 def secrets_to_env(secrets, gcp_project_id, filename):
 
-    print("\nDumping secrets from project "+gcp_project_id+" to "+filename+" file\n")
+    print(f"\nDumping secrets from project {gcp_project_id} to {filename} file\n")
     file = open(filename, "w")
     try:
         for key, value in secrets.items():
-            file.write(f"{key.upper()}={value}\n")
+            file.write(f"{key.upper().replace('-','_')}='{value}'\n")
     except Exception as e:
-        print("ERROR : "+str(e))
+        print(f"ERROR: {str(e)}")
         sys.exit(1)
     finally:
         file.close()
 
 def secrets_to_json(secrets, gcp_project_id, filename):
 
-    print("\nDumping secrets from project "+gcp_project_id+" to "+filename+".json file\n")
+    print(f"\nDumping secrets from project {gcp_project_id} to {filename}.json file\n")
+    file = open(filename+".json", "w")
     try:
-        with open(filename+".json", "w") as file:
-            json.dump(secrets, file, indent=2, sort_keys=False)
+        for key in list(secrets.keys()):
+            if not isinstance(key, str):
+                continue
+            value = secrets[key]
+            del secrets[key]
+            secrets[key.replace("-","_")] = value
+        json.dump(secrets, file, indent=2, sort_keys=False)
     except Exception as e:
-        print("ERROR : "+str(e))
+        print(f"ERROR: {str(e)}")
         sys.exit(1)
     finally:
         file.close()
 
 if __name__ == "__main__":
     main()
+
