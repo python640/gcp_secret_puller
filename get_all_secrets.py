@@ -13,26 +13,21 @@ def main():
 
         python3 get_all_secrets.py <gcp_project_id>
 
-
     To dump all the secrets from <gcp_project_id> filtered by label (for example with label 'env: stage')
 
         python3 get_all_secrets.py <gcp_project_id> --filter labels.env=stage
 
-
     To dump all the secrets from <gcp_project_id> to .env.json file
 
         python3 get_all_secrets.py --format json <gcp_project_id>
-        
-        
+               
     To dump all the secrets from <gcp_project_id> to STDOUT
 
         python3 get_all_secrets.py --format stdout <gcp_project_id>
 
-
     To dump all the secrets from <gcp_project_id> to cookiemonster.env file in key/value
 
         python3 get_all_secrets.py --filename cookiemonster.env <gcp_project_id>
-
 
     To dump all the secrets from <gcp_project_id> to cypress.env.json file in json format
 
@@ -163,4 +158,3 @@ def secrets_to_json(secrets, gcp_project_id, filename):
 
 if __name__ == "__main__":
     main()
-
