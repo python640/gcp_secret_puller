@@ -29,7 +29,7 @@ positional arguments:
 optional arguments:
   -h, --help      show this help message and exit
   --filter        Filter secrets with labels
-  --format        Output file format (json / .env). Default is .env
+  --format        Output file format (json / env / stdout). Default is env
   --filename      Output filename. Default is .env or .env.json (depends on --format flag)
 
 Examples:
@@ -45,6 +45,10 @@ To dump all the secrets from <gcp_project_id> filtered by label (for example wit
 To dump all the secrets from <gcp_project_id> to .env.json file
 
     python3 get_all_secrets.py --format json <gcp_project_id>
+    
+To dump all the secrets from <gcp_project_id> to STDOUT
+
+    python3 get_all_secrets.py --format stdout <gcp_project_id>
 
 To dump all the secrets from <gcp_project_id> to cookiemonster.env file in key/value
 
